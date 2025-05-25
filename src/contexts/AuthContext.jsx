@@ -1,9 +1,9 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
   updateProfile
@@ -31,25 +31,25 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       console.log("Starting registration process...");
-      
+
       // Create user in Firebase
       console.log("Creating user in Firebase...");
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       console.log("Firebase user created successfully:", firebaseUser.uid);
-      
+
       // Update Firebase profile with display name
       console.log("Updating Firebase profile with display name...");
       await updateProfile(firebaseUser, {
         displayName: fullName
       });
       console.log("Firebase profile updated successfully");
-      
+
       // Get Firebase token
       console.log("Getting Firebase token...");
       const token = await firebaseUser.getIdToken(true);
       console.log("Firebase token obtained");
-      
+
       // Create user in your backend database
       console.log("Registering user with backend...");
       try {
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         console.error("Backend registration failed, but Firebase registration succeeded:", backendError);
         // Continue anyway since Firebase auth succeeded
       }
-      
+
       return firebaseUser;
     } catch (error) {
       console.error("Registration error:", error);
@@ -75,18 +75,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       console.log("Starting login process...");
-      
+
       // Sign in with Firebase
       console.log("Signing in with Firebase...");
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
       console.log("Firebase login successful:", firebaseUser.uid);
-      
+
       // Get Firebase token
       console.log("Getting Firebase token...");
       const token = await firebaseUser.getIdToken(true);
       console.log("Firebase token obtained");
-      
+
       // Authenticate with your backend
       console.log("Authenticating with backend...");
       try {
@@ -98,14 +98,14 @@ export const AuthProvider = ({ children }) => {
         console.error("Backend authentication failed, but Firebase login succeeded:", backendError);
         // Continue anyway since Firebase auth succeeded
       }
-      
+
       // Check if there's a pending LinkedIn connection to complete
       const pendingLinkedInState = sessionStorage.getItem('pendingLinkedInState');
       if (pendingLinkedInState) {
         console.log('Found pending LinkedIn connection, will complete after login');
         // We'll handle this in the useEffect after the user is fully authenticated
       }
-      
+
       return firebaseUser;
     } catch (error) {
       console.error("Login error:", error);
@@ -119,11 +119,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       console.log("Logging out...");
-      
+
       // Clear all session and local storage
       sessionStorage.clear();
       localStorage.clear();
-      
+
       // Clear any API tokens or cookies
       try {
         // Call backend logout endpoint if available
@@ -132,20 +132,20 @@ export const AuthProvider = ({ children }) => {
       } catch (backendError) {
         console.log("Backend logout failed or not implemented, continuing with Firebase logout");
       }
-      
+
       // Sign out from Firebase
       await signOut(auth);
       console.log("Firebase logout successful");
-      
+
       // Force clear the current user state
       setCurrentUser(null);
-      
+
       // Redirect to landing page if requested
       if (redirectToLanding) {
         console.log("Redirecting to landing page after logout");
         window.location.href = '/';
       }
-      
+
       console.log("Logout process completed");
     } catch (error) {
       console.error("Logout error:", error);
@@ -186,7 +186,7 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = async (profileData) => {
     try {
       setError(null);
-      
+
       if (currentUser) {
         // Update Firebase profile if needed
         if (profileData.displayName) {
@@ -196,7 +196,7 @@ export const AuthProvider = ({ children }) => {
           });
           console.log("Firebase profile updated successfully");
         }
-        
+
         // Update backend profile
         console.log("Updating backend profile...");
         try {
@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         console.log("Auth state changed:", user ? `User: ${user.uid}` : "No user");
-        
+
         if (user) {
           // User is signed in, sync with backend
           console.log("User is signed in, syncing with backend...");
@@ -229,20 +229,20 @@ export const AuthProvider = ({ children }) => {
               token: token
             });
             console.log("Backend sync successful:", response.data);
-            
+
             // Check if there's a pending LinkedIn connection to complete
             const pendingLinkedInState = sessionStorage.getItem('pendingLinkedInState');
             if (pendingLinkedInState) {
               console.log('Found pending LinkedIn connection, completing now...');
               try {
                 // Complete the LinkedIn connection
-                const linkedInResponse = await api.post('/linkedin/complete-connection', { 
-                  state: pendingLinkedInState 
+                const linkedInResponse = await api.post('/linkedin/complete-connection', {
+                  state: pendingLinkedInState
                 });
                 console.log('LinkedIn connection completed successfully:', linkedInResponse.data);
                 // Clear the pending state
                 sessionStorage.removeItem('pendingLinkedInState');
-                
+
                 // Check if we need to redirect to a specific page
                 const linkedInReturnUrl = sessionStorage.getItem('linkedInReturnUrl');
                 if (linkedInReturnUrl) {
@@ -260,7 +260,7 @@ export const AuthProvider = ({ children }) => {
                 sessionStorage.removeItem('pendingLinkedInState');
               }
             }
-            
+
             // Handle redirect after login if needed
             const redirectPath = sessionStorage.getItem('redirectAfterLogin');
             if (redirectPath && window.location.pathname === '/auth') {
@@ -277,7 +277,7 @@ export const AuthProvider = ({ children }) => {
             // Continue anyway since Firebase auth is valid
           }
         }
-        
+
         // Set current user state after all processing
         setCurrentUser(user);
       } catch (error) {

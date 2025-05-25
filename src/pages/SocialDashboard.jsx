@@ -30,7 +30,7 @@ const SocialDashboard = () => {
   const [disconnecting, setDisconnecting] = useState(null);
   const [linkedInState, setLinkedInState] = useState("");
   const [greeting, setGreeting] = useState("Good Day");
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, loading: authLoading } = useAuth();
@@ -69,13 +69,13 @@ const SocialDashboard = () => {
       console.log("🔄 Fetching connected accounts for user:", currentUser.uid);
       const response = await api.get("/linkedin/accounts");
       console.log("✅ Full accounts response:", JSON.stringify(response.data, null, 2));
-      
+
       // Check for expired tokens
       const accounts = response.data.accounts.map(account => ({
         ...account,
         token_expired: account.expires_at && new Date(account.expires_at) < new Date(),
       }));
-      
+
       setConnectedAccounts(accounts);
       if (accounts.some(account => account.token_expired)) {
         setError("One or more LinkedIn accounts have expired tokens. Please reconnect.");
@@ -97,18 +97,18 @@ const SocialDashboard = () => {
       }
 
       console.log("🔄 Fetching LinkedIn auth URL...");
-      
+
       const currentPage = window.location.href;
       console.log("Current page for return_to:", currentPage);
-      
+
       const authUrlResponse = await api.get(`/linkedin/auth-url?return_to=${encodeURIComponent(currentPage)}`);
-      
+
       console.log("✅ Auth URL response:", authUrlResponse.data);
 
       if (!authUrlResponse.data.authUrl) {
         throw new Error("No LinkedIn auth URL returned from server. Please check backend configuration.");
       }
-      
+
       setLinkedInAuthUrl(authUrlResponse.data.authUrl);
       setLinkedInState(authUrlResponse.data.state);
       console.log("LinkedIn auth URL set:", authUrlResponse.data.authUrl);
@@ -123,7 +123,7 @@ const SocialDashboard = () => {
       } else if (error.response?.status === 401) {
         errorMessage = "Authentication error. Please refresh the page or log in again.";
       }
-      
+
       if (retryCount < maxRetries) {
         console.log(`🔄 Retrying fetchInitialData (attempt ${retryCount + 1})...`);
         setTimeout(() => fetchInitialData(retryCount + 1), 1000);
@@ -140,13 +140,13 @@ const SocialDashboard = () => {
   const handleLinkedInConnect = async (accountType = "personal") => {
     console.log("Starting LinkedIn connection process...");
     setError(null);
-    
+
     if (!linkedInAuthUrl) {
       console.error("LinkedIn auth URL is missing");
       setError("LinkedIn authentication URL is not available. Please refresh the page or try again later.");
       return;
     }
-    
+
     if (!currentUser) {
       console.error("No current user found when trying to connect LinkedIn");
       setError("Please log in first before connecting LinkedIn account.");
@@ -154,14 +154,14 @@ const SocialDashboard = () => {
       navigate('/auth');
       return;
     }
-    
+
     try {
       const url = new URL(linkedInAuthUrl);
       url.searchParams.set("account_type", accountType);
       url.searchParams.set("state", linkedInState);
-      
+
       sessionStorage.setItem('linkedInReturnUrl', window.location.href);
-      
+
       console.log("🔗 Redirecting to LinkedIn auth:", url.toString());
       window.location.href = url.toString();
     } catch (err) {
@@ -183,26 +183,26 @@ const SocialDashboard = () => {
     try {
       setDisconnecting(accountId);
       console.log(`🔄 Disconnecting account ${accountId} for authenticated user...`);
-      
+
       // Ensure we're using a valid ID format
       if (!accountId) {
         throw new Error("Invalid account ID");
       }
-      
+
       // Make sure we're using the correct endpoint
       const response = await api.delete(`/linkedin/accounts/${accountId}`);
-      
+
       console.log("✅ Account disconnected successfully:", response.data);
       setSuccessMessage("LinkedIn account disconnected successfully");
       setTimeout(() => setSuccessMessage(""), 5000);
-      
+
       // Refresh the accounts list
       await fetchConnectedAccounts();
-      
+
     } catch (error) {
       console.error("❌ Error disconnecting account:", error);
       console.error("Error details:", error.response?.data || error.message);
-      
+
       if (error.response?.status === 401) {
         setError("Authentication issue. Please refresh the page.");
         setTimeout(() => setError(null), 5000);
@@ -227,9 +227,9 @@ const SocialDashboard = () => {
       navigate('/auth');
       return;
     }
-    
+
     setError(null);
-    
+
     switch (platform) {
       case "linkedin":
         console.log("Opening LinkedIn account type selector");
@@ -274,7 +274,7 @@ const SocialDashboard = () => {
         cleanupUrl();
         return;
       }
-      
+
       // If we have code and state but no user, save them and redirect to auth
       if ((code && state) && !currentUser) {
         console.log("LinkedIn OAuth callback detected but user not logged in");
@@ -284,23 +284,23 @@ const SocialDashboard = () => {
         navigate('/auth');
         return;
       }
-      
+
       // If we have code and state and user is logged in, process the callback
       if (code && state && currentUser) {
         console.log("Direct LinkedIn OAuth callback detected with code and state");
         try {
           const response = await api.post('/linkedin/callback', { code, state });
           console.log("LinkedIn OAuth callback processed successfully:", response.data);
-          
+
           // Now complete the connection with the state
           const completeResponse = await api.post('/linkedin/complete-connection', { state });
           console.log("LinkedIn connection completed:", completeResponse.data);
-          
+
           setSuccessMessage("LinkedIn account connected successfully!");
           setTimeout(() => setSuccessMessage(""), 5000);
-          
+
           await fetchConnectedAccounts();
-          
+
           cleanupUrl();
           return;
         } catch (error) {
@@ -311,7 +311,7 @@ const SocialDashboard = () => {
           return;
         }
       }
-      
+
       // Handle the case where we've been redirected back with linkedin_connected=true
       if (linkedinConnected === 'true' && state) {
         if (!currentUser) {
@@ -325,19 +325,19 @@ const SocialDashboard = () => {
         try {
           console.log("Completing LinkedIn connection...");
           const response = await api.post('/linkedin/complete-connection', { state });
-          
+
           if (response.data.success) {
             setSuccessMessage(`LinkedIn account connected successfully! Welcome ${response.data.account?.name || 'User'}!`);
             setTimeout(() => setSuccessMessage(""), 5000);
-            
+
             await fetchConnectedAccounts();
-            
+
             console.log("✅ LinkedIn connection completed successfully");
           }
         } catch (error) {
           console.error('❌ Error completing LinkedIn connection:', error);
           let errorMessage = 'Failed to complete LinkedIn connection';
-          
+
           if (error.response?.status === 409) {
             errorMessage = 'This LinkedIn account is already connected to another user.';
           } else if (error.response?.status === 404) {
@@ -345,10 +345,10 @@ const SocialDashboard = () => {
           } else if (error.response?.data?.detail) {
             errorMessage = error.response.data.detail;
           }
-          
+
           setError(errorMessage);
         }
-        
+
         cleanupUrl();
       }
     };
@@ -499,7 +499,7 @@ const SocialDashboard = () => {
                   >
                     <h3 className="text-xl font-bold mb-4 text-gray-800">Select LinkedIn Account Type</h3>
                     <p className="text-gray-600 mb-6">Choose the type of LinkedIn account you want to connect:</p>
-                    
+
                     <div className="space-y-4">
                       <button
                         onClick={() => handleAccountTypeSelect("personal")}
@@ -513,7 +513,7 @@ const SocialDashboard = () => {
                           <p className="text-sm text-gray-500">Connect your individual LinkedIn profile</p>
                         </div>
                       </button>
-                      
+
                       <button
                         onClick={() => handleAccountTypeSelect("company")}
                         className="w-full p-4 bg-white border border-gray-300 rounded-lg flex items-center hover:bg-gray-50 transition-colors"
@@ -527,7 +527,7 @@ const SocialDashboard = () => {
                         </div>
                       </button>
                     </div>
-                    
+
                     <div className="mt-6 flex justify-end">
                       <button
                         onClick={() => setShowAccountTypeSelector(false)}
@@ -601,8 +601,8 @@ const SocialDashboard = () => {
                           title="Disconnect"
                           disabled={disconnecting === (account._id || account.account_id || account.id)}
                         >
-                          {disconnecting === (account._id || account.account_id || account.id) ? 
-                            <FaSpinner className="animate-spin" /> : 
+                          {disconnecting === (account._id || account.account_id || account.id) ?
+                            <FaSpinner className="animate-spin" /> :
                             <FaTimes />}
                         </button>
                       </div>
