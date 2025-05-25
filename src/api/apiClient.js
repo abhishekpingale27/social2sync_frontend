@@ -3,7 +3,7 @@ import axios from "axios";
 import { auth } from "../firebase/config";
 
 const apiClient = axios.create({
-  baseURL: "https://social2sync-backend.onrender.com", // Changed from 127.0.0.1 to localhost
+  baseURL: "https://social2sync-backend.onrender.com/api", // Changed from 127.0.0.1 to localhost
   timeout: 120000, // Increased timeout to 2 minutes for AI-powered operations
   headers: {
     'Content-Type': 'application/json',
