@@ -16,7 +16,7 @@ import {
   FaRegCopy,
   FaHashtag,
   FaChartLine,
-  FaTrendingUp,
+  FaArrowUp,
   FaBolt,
   FaRegThumbsUp,
   FaRegHeart,
@@ -283,7 +283,7 @@ const MainContent = () => {
               />
 
               <QuickActionCard
-                icon={<FaTrendingUp className="text-orange-500" />}
+                icon={<FaArrowUp className="text-orange-500" />}
                 title="Trending Topics"
                 description="Stay ahead of trends"
                 action={() => handleSendMessage("What are the hottest social media trends I should jump on right now?")}
