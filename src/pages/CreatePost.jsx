@@ -258,7 +258,7 @@ const CreatePost = () => {
       const imagePromises = promptVariations.map(async (promptVar, index) => {
         try {
           const imageRes = await axios.post(
-            "http://127.0.0.1:8000/api/generate-image/",
+            "https://social2sync-backend.onrender.com/api/generate-image/",
             { prompt: promptVar },
             {
               responseType: "blob",
@@ -631,7 +631,7 @@ const CreatePost = () => {
       });
 
       const captionRes = await axios.post(
-        "http://127.0.0.1:8000/api/generate-caption/",
+        "https://social2sync-backend.onrender.com/api/generate-caption/",
         {
           prompt: prompt,
           platform: selectedPlatform.toLowerCase(),
@@ -677,7 +677,7 @@ const CreatePost = () => {
           });
           
           const imageRes = await axios.post(
-            "http://127.0.0.1:8000/api/generate-image/",
+            "https://social2sync-backend.onrender.com/api/generate-image/",
             { prompt: promptVariations[i] },
             { responseType: "blob", timeout: 60000 }
           );
@@ -692,7 +692,7 @@ const CreatePost = () => {
         }
       } else {
         const imageRes = await axios.post(
-          "http://127.0.0.1:8000/api/generate-image/",
+          "https://social2sync-backend.onrender.com/api/generate-image/",
           { prompt: prompt },
           { responseType: "blob", timeout: 60000 }
         );
@@ -735,7 +735,7 @@ const CreatePost = () => {
 
     try {
       const imageRes = await axios.post(
-        "http://127.0.0.1:8000/api/generate-image/",
+        "https://social2sync-backend.onrender.com/api/generate-image/",
         { prompt: prompt },
         { responseType: "blob", timeout: 60000 }
       );
@@ -871,12 +871,12 @@ const CreatePost = () => {
       };
 
       console.log("📤 Posting to backend with:", {
-        url: "http://127.0.0.1:8000/api/post-now/",
+        url: "https://social2sync-backend.onrender.com/api/post-now/",
         data: postData,
       });
 
       const postResponse = await axios.post(
-        "http://127.0.0.1:8000/api/post-now/",
+        "https://social2sync-backend.onrender.com/api/post-now/",
         postData,
         {
           timeout: 30000,
