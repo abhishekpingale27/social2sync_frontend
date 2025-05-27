@@ -330,7 +330,7 @@ ${post.description}
   const generateShareLink = async () => {
     setIsSharing(true);
     try {
-      const mockLink = `https://yourdomain.com/share/${campaignId || 'new'}`;
+      const mockLink = `https://social2sync.vercel.app/campaign/${campaignId || 'new'}`;
       setShareLink(mockLink);
 
       await navigator.clipboard.writeText(mockLink);
