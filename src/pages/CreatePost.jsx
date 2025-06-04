@@ -466,7 +466,7 @@ const CreatePost = () => {
               </button>
             </div>
             <div className="mb-4 flex space-x-2">
-              <button
+{/*               <button
                 onClick={handleDownload}
                 className="flex-1 flex items-center justify-center py-2 rounded-lg font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-md transition text-sm"
               >
@@ -479,7 +479,7 @@ const CreatePost = () => {
               >
                 <FaEdit className="mr-1.5 text-xs" />
                 Edit with Canva
-              </button>
+              </button> */}
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-gray-200 space-x-2">
               <motion.button
